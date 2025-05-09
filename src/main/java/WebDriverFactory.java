@@ -2,28 +2,37 @@ import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
 
-/**
- * Статический класс получения драйвера в зависимости от параметров теста
- */
+
 public class WebDriverFactory {
 
-    /**
-     * Получение драйвера
-     * @param browser тип браузера
-     * @return WebDriver
-     */
+    /*
+     Переменные окружения, прописанные в системе:
+     BROWSER_DRIVERS - путь к папке с драйверами для браузеров
+     YANDEX_BROWSER_DRIVER_FILENAME - имя файла драйвера Яндекс браузера (Хромдрайвера нужной версии)
+     YANDEX_BROWSER_PATH - путь к исполняемому файлу Яндекс браузера в системе
+      */
     public static WebDriver getDriver(String browser) {
-        switch (browser.toLowerCase()) {
-            case "chrome":
-                System.setProperty("webdriver.chrome.driver", "C:\\practicum\\Diplom\\chromedriver\\chromedriver.exe");
-                return new ChromeDriver();
+
+        switch (browser) {
             case "yandex":
-                System.setProperty("webdriver.chrome.driver", "C:\\practicum\\Diplom\\yandexdriver\\yandexdriver.exe");
-                ChromeOptions yandexOptions = new ChromeOptions();
-                yandexOptions.setBinary("C:\\Program Files (x86)\\Yandex\\YandexBrowser\\Application\\browser.exe");
-                return new ChromeDriver(yandexOptions);
+                return createYandexDriver();
+            case "chrome":
             default:
-                throw new IllegalArgumentException("Unknown browser: " + browser);
+                return createChromeDriver();
         }
+    }
+
+    private static WebDriver createChromeDriver() {
+        ChromeOptions options = new ChromeOptions();
+        options.addArguments("start-maximized");
+        return new ChromeDriver(options);
+    }
+
+    private static WebDriver createYandexDriver() {
+        System.setProperty("webdriver.chrome.driver", String.format("%s/%s", System.getenv("BROWSER_DRIVERS"),
+                System.getenv("YANDEX_BROWSER_DRIVER_FILENAME")));
+        ChromeOptions options = new ChromeOptions();
+        options.setBinary(System.getenv("YANDEX_BROWSER_PATH"));
+        return new ChromeDriver(options);
     }
 }
